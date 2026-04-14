@@ -44,7 +44,7 @@
 
     .draggable-window { position: absolute; z-index: 10; }
     .title-bar { cursor: move; }
-    .draggable-window > .window { resize: both; overflow: auto; min-width: 200px; min-height: 100px; box-shadow: 2px 2px 3px rgba(0,0,0,0.3); }
+    .draggable-window > .window { overflow: auto; min-width: 200px; min-height: 100px; box-shadow: 2px 2px 3px rgba(0,0,0,0.3); }
     .draggable-window.minimized { display: none !important; }
 
     #win-main    { top: 30px;  left: 30px;  width: 720px; max-width: 90vw; }
@@ -146,6 +146,52 @@
     .player-vol-row { display: flex; align-items: center; gap: 6px; font-size: 10px; }
     .player-vol-row input { flex: 1; accent-color: #000080; cursor: pointer; }
     .player-time { font-size: 10px; color: #555; text-align: center; }
+
+    /* File Explorer */
+    #win-explorer { top: 70px; left: 80px; width: 560px; max-width: 95vw; display: none; }
+    .explorer-toolbar { display: flex; align-items: center; gap: 4px; padding: 3px 6px; border-bottom: 1px solid #808080; background: #c0c0c0; }
+    .explorer-toolbar button { font-size: 10px; padding: 2px 8px !important; height: 22px; }
+    .explorer-address { display: flex; align-items: center; gap: 4px; padding: 3px 6px; border-bottom: 2px solid #808080; font-size: 11px; }
+    .explorer-address-bar { flex: 1; border: inset 2px; padding: 1px 4px; font-size: 11px; background: #fff; }
+    .explorer-body { display: flex; height: 300px; }
+    .explorer-tree { width: 160px; border-right: 2px solid #808080; overflow-y: auto; padding: 4px; font-size: 11px; flex-shrink: 0; }
+    .explorer-tree-item { display: flex; align-items: center; gap: 4px; padding: 2px 4px; cursor: pointer; white-space: nowrap; }
+    .explorer-tree-item:hover, .explorer-tree-item.selected { background: #000080; color: white; }
+    .explorer-tree-item img { width: 16px; height: 16px; image-rendering: pixelated; flex-shrink: 0; }
+    .explorer-tree-item.indent1 { padding-left: 20px; }
+    .explorer-tree-item.indent2 { padding-left: 36px; }
+    .explorer-files { flex: 1; padding: 6px; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 4px; overflow-y: auto; background: #fff; border: inset 2px; margin: 4px; }
+    .explorer-file { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 72px; padding: 4px; cursor: pointer; font-size: 10px; text-align: center; border: 1px solid transparent; }
+    .explorer-file:hover { background: #c8c8ff; border-color: #000080; }
+    .explorer-file.selected { background: #000080; color: white; border-color: #000080; }
+    .explorer-file img { width: 32px; height: 32px; image-rendering: pixelated; }
+    .explorer-file span { word-break: break-word; line-height: 1.2; }
+    .explorer-status { font-size: 10px; padding: 2px 8px; border-top: 2px solid #808080; color: #444; display: flex; gap: 12px; }
+
+    /* Minesweeper */
+    #win-mine { top: 100px; left: 200px; width: auto; max-width: 95vw; display: none; }
+    .mine-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: #c0c0c0; border-bottom: 2px solid #808080; gap: 8px; }
+    .mine-counter { background: #000; color: #f00; font-family: 'Courier New', monospace; font-size: 18px; font-weight: bold; padding: 2px 6px; border: inset 2px; min-width: 44px; text-align: center; letter-spacing: 2px; }
+    .mine-face-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0 !important; cursor: pointer; flex-shrink: 0; }
+    .mine-face-btn svg { width: 20px; height: 20px; image-rendering: pixelated; }
+    .mine-grid { padding: 6px; background: #c0c0c0; display: inline-block; border: inset 2px; margin: 6px; }
+    .mine-row { display: flex; }
+    .mine-cell { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; border: outset 2px; background: #c0c0c0; font-family: Arial, sans-serif; flex-shrink: 0; user-select: none; }
+    .mine-cell.revealed { border: 1px solid #808080; background: #c0c0c0; cursor: default; }
+    .mine-cell.flagged { border: outset 2px; background: #c0c0c0; }
+    .mine-cell.exploded { background: #ff0000; border: 1px solid #808080; }
+    .mine-cell svg { width: 14px; height: 14px; image-rendering: pixelated; }
+    .mine-cell[data-n="1"] { color: #0000ff; }
+    .mine-cell[data-n="2"] { color: #007b00; }
+    .mine-cell[data-n="3"] { color: #ff0000; }
+    .mine-cell[data-n="4"] { color: #00007b; }
+    .mine-cell[data-n="5"] { color: #7b0000; }
+    .mine-cell[data-n="6"] { color: #007b7b; }
+    .mine-cell[data-n="7"] { color: #000000; }
+    .mine-cell[data-n="8"] { color: #808080; }
+    .mine-difficulty { display: flex; gap: 4px; padding: 4px 6px; border-bottom: 1px solid #808080; font-size: 10px; align-items: center; }
+    .mine-difficulty button { font-size: 10px; padding: 1px 6px !important; }
+    .mine-difficulty button.active { border: inset 1px; background: #a0a0a0; }
   </style>
 </head>
 <body>
@@ -392,6 +438,64 @@
     </div>
   </div>
 
+  <!-- FILE EXPLORER -->
+  <div class="draggable-window" id="win-explorer">
+    <div class="window">
+      <div class="title-bar">
+        <div class="title-bar-text" id="explorer-title">My Computer</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize" onclick="toggleMinimize('win-explorer')"></button>
+          <button aria-label="Maximize" onclick="toggleMaximize('win-explorer')"></button>
+          <button aria-label="Close" onclick="closeWindow('win-explorer')"></button>
+        </div>
+      </div>
+      <div class="explorer-toolbar">
+        <button onclick="explorerBack()">← Back</button>
+        <button onclick="explorerForward()">Forward →</button>
+        <button onclick="explorerUp()">↑ Up</button>
+      </div>
+      <div class="explorer-address">
+        <label style="font-size:10px;white-space:nowrap">Address:</label>
+        <input class="explorer-address-bar" id="explorer-addr" readonly value="C:\">
+      </div>
+      <div class="explorer-body">
+        <div class="explorer-tree" id="explorer-tree"></div>
+        <div class="explorer-files" id="explorer-files"></div>
+      </div>
+      <div class="explorer-status">
+        <span id="explorer-status-items">0 object(s)</span>
+        <span id="explorer-status-size"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MINESWEEPER -->
+  <div class="draggable-window" id="win-mine">
+    <div class="window" style="display:inline-block;width:auto;">
+      <div class="title-bar">
+        <div class="title-bar-text">Minesweeper</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize" onclick="toggleMinimize('win-mine')"></button>
+          <button aria-label="Close" onclick="closeWindow('win-mine')"></button>
+        </div>
+      </div>
+      <div class="mine-difficulty">
+        <span>Difficulty:</span>
+        <button id="mine-btn-easy" class="active" onclick="mineSetDiff('easy')">Beginner</button>
+        <button id="mine-btn-med" onclick="mineSetDiff('med')">Intermediate</button>
+        <button id="mine-btn-hard" onclick="mineSetDiff('hard')">Expert</button>
+      </div>
+      <div class="mine-header">
+        <div class="mine-counter" id="mine-flag-count">000</div>
+        <button class="mine-face-btn" id="mine-face" onclick="mineInit()"></button>
+        <div class="mine-counter" id="mine-timer">000</div>
+      </div>
+      <div style="text-align:center;">
+        <div class="mine-grid" id="mine-grid"></div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /desktop -->
 
 <div id="start-menu" class="start-menu">
@@ -428,6 +532,14 @@
         <div class="start-menu-item" onclick="openWindow('win-player');document.getElementById('start-menu').classList.remove('active')">
           <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png" style="width:20px;height:20px;" onerror="this.style.display='none'">
           <span>Media Player</span>
+        </div>
+        <div class="start-menu-item" onclick="openWindow('win-explorer');explorerLoadRepos();document.getElementById('start-menu').classList.remove('active')">
+          <img src="https://win98icons.alexmeub.com/icons/png/my_computer-0.png" style="width:20px;height:20px;" onerror="this.style.display='none'">
+          <span>My Computer</span>
+        </div>
+        <div class="start-menu-item" onclick="openWindow('win-mine');mineInit();document.getElementById('start-menu').classList.remove('active')">
+          <img src="https://win98icons.alexmeub.com/icons/png/minesweeper_mine-0.png" style="width:20px;height:20px;" onerror="this.style.display='none'">
+          <span>Minesweeper</span>
         </div>
       </div>
     </div>
@@ -472,6 +584,8 @@
   <button class="taskbar-task" id="btn-win-paint"   onclick="taskbarToggle('win-paint')">Paint</button>
   <button class="taskbar-task" id="btn-win-notepad" onclick="taskbarToggle('win-notepad')">Notepad</button>
   <button class="taskbar-task" id="btn-win-player"  onclick="taskbarToggle('win-player')">Media Player</button>
+  <button class="taskbar-task" id="btn-win-explorer" onclick="taskbarToggle('win-explorer')">My Computer</button>
+  <button class="taskbar-task" id="btn-win-mine" onclick="taskbarToggle('win-mine')">Minesweeper</button>
   <div class="taskbar-clock" id="taskbar-clock">--:--</div>
 </div>
 
@@ -487,6 +601,10 @@ function runBootSequence() {
   }, 4200);
 }
 window.addEventListener('load', runBootSequence);
+window.addEventListener('load', () => {
+  explorerLoadRepos();
+  mineInit();
+});
 
 /* ── BSOD ── */
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -753,26 +871,412 @@ canvas.addEventListener('mousedown', e => {
   startX=e.clientX-r.left; startY=e.clientY-r.top;
   if(currentTool==='fill'){floodFill(Math.floor(startX),Math.floor(startY),currentColor);painting=false;return;}
   snapshot=ctx2.getImageData(0,0,canvas.width,canvas.height);
-  ctx2.beginPath(); ctx2.arc(startX,startY,brushSize/2,0,Math.PI*2);
+  ctx2.beginPath();
+  ctx2.arc(startX,startY,brushSize/2,0,Math.PI*2);
   ctx2.fillStyle=currentTool==='eraser'?'#ffffff':currentColor; ctx2.fill();
+  ctx2.beginPath(); ctx2.moveTo(startX, startY);
 });
 canvas.addEventListener('mousemove', e => {
   const r=canvas.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
   document.getElementById('paint-status').textContent=`X: ${Math.floor(x)}, Y: ${Math.floor(y)}`;
   if(!painting) return;
   if(currentTool==='pencil'||currentTool==='eraser'){
-    ctx2.beginPath(); ctx2.arc(x,y,brushSize/2,0,Math.PI*2);
-    ctx2.fillStyle=currentTool==='eraser'?'#ffffff':currentColor; ctx2.fill();
+    ctx2.lineTo(x, y);
+    ctx2.strokeStyle=currentTool==='eraser'?'#ffffff':currentColor;
+    ctx2.lineWidth=brushSize;
+    ctx2.lineCap='round';
+    ctx2.lineJoin='round';
+    ctx2.stroke();
+    ctx2.beginPath(); ctx2.moveTo(x, y);
+    startX=x; startY=y;
   } else if(currentTool==='line'){
     ctx2.putImageData(snapshot,0,0); ctx2.beginPath(); ctx2.moveTo(startX,startY); ctx2.lineTo(x,y);
-    ctx2.strokeStyle=currentColor; ctx2.lineWidth=brushSize; ctx2.stroke();
+    ctx2.strokeStyle=currentColor; ctx2.lineWidth=brushSize; ctx2.lineCap='round'; ctx2.stroke();
   } else if(currentTool==='rect'){
     ctx2.putImageData(snapshot,0,0); ctx2.strokeStyle=currentColor; ctx2.lineWidth=brushSize;
     ctx2.strokeRect(startX,startY,x-startX,y-startY);
   }
 });
-canvas.addEventListener('mouseup', ()=>{painting=false;});
-canvas.addEventListener('mouseleave', ()=>{painting=false;});
+canvas.addEventListener('mouseup', ()=>{painting=false; ctx2.beginPath();});
+canvas.addEventListener('mouseleave', ()=>{painting=false; ctx2.beginPath();});
+
+/* ── File Explorer (GitHub) ── */
+const GITHUB_USER = 'generichris';
+let explorerRepos = [];
+let explorerCurrentRepo = null;
+let explorerCurrentPath = '';
+
+function explorerGetLangIcon(lang) {
+  const map = {
+    'Python': 'https://win98icons.alexmeub.com/icons/png/file_settings-0.png',
+    'JavaScript': 'https://win98icons.alexmeub.com/icons/png/html-1.png',
+    'HTML': 'https://win98icons.alexmeub.com/icons/png/html-1.png',
+    'CSS': 'https://win98icons.alexmeub.com/icons/png/html-1.png',
+    'Java': 'https://win98icons.alexmeub.com/icons/png/file_settings-0.png',
+    'C++': 'https://win98icons.alexmeub.com/icons/png/file_settings-0.png',
+    'C': 'https://win98icons.alexmeub.com/icons/png/file_settings-0.png',
+    'TypeScript': 'https://win98icons.alexmeub.com/icons/png/html-1.png',
+  };
+  return map[lang] || 'https://win98icons.alexmeub.com/icons/png/file-0.png';
+}
+
+function explorerFileIcon(name) {
+  if (name.endsWith('.py'))   return 'https://win98icons.alexmeub.com/icons/png/file_settings-0.png';
+  if (name.endsWith('.js'))   return 'https://win98icons.alexmeub.com/icons/png/html-1.png';
+  if (name.endsWith('.html')) return 'https://win98icons.alexmeub.com/icons/png/html-1.png';
+  if (name.endsWith('.css'))  return 'https://win98icons.alexmeub.com/icons/png/html-1.png';
+  if (name.endsWith('.md'))   return 'https://win98icons.alexmeub.com/icons/png/notepad-0.png';
+  if (name.endsWith('.txt'))  return 'https://win98icons.alexmeub.com/icons/png/notepad-0.png';
+  if (name.endsWith('.json')) return 'https://win98icons.alexmeub.com/icons/png/file_settings-0.png';
+  if (name.endsWith('.jpg') || name.endsWith('.png') || name.endsWith('.gif')) return 'https://win98icons.alexmeub.com/icons/png/paint_old-0.png';
+  return 'https://win98icons.alexmeub.com/icons/png/file-0.png';
+}
+
+async function explorerLoadRepos() {
+  const filesEl = document.getElementById('explorer-files');
+  const treeEl  = document.getElementById('explorer-tree');
+  filesEl.innerHTML = '<div style="padding:8px;font-size:11px;color:#555">Loading repositories...</div>';
+  treeEl.innerHTML  = '';
+  document.getElementById('explorer-addr').value    = 'GitHub / ' + GITHUB_USER;
+  document.getElementById('explorer-title').textContent = GITHUB_USER + ' - GitHub';
+  try {
+    const res = await fetch(`https://api.github.com/users/${GITHUB_USER}/repos?sort=updated&per_page=100`);
+    explorerRepos = await res.json();
+    explorerBuildTree();
+    explorerShowRepos();
+  } catch(e) {
+    filesEl.innerHTML = '<div style="padding:8px;font-size:11px;color:red">Failed to load repositories. Check your connection.</div>';
+  }
+}
+
+function explorerBuildTree() {
+  const treeEl = document.getElementById('explorer-tree');
+  treeEl.innerHTML = '';
+  // Root
+  const root = document.createElement('div');
+  root.className = 'explorer-tree-item';
+  root.innerHTML = `<img src="https://win98icons.alexmeub.com/icons/png/network_internet_explorer-0.png" onerror="this.src='https://win98icons.alexmeub.com/icons/png/folder_closed-0.png'"><span>${GITHUB_USER}</span>`;
+  root.onclick = () => { explorerCurrentRepo = null; explorerCurrentPath = ''; explorerShowRepos(); document.getElementById('explorer-addr').value = 'GitHub / ' + GITHUB_USER; document.getElementById('explorer-title').textContent = GITHUB_USER + ' - GitHub'; };
+  treeEl.appendChild(root);
+  explorerRepos.forEach(repo => {
+    const div = document.createElement('div');
+    div.className = 'explorer-tree-item indent1';
+    div.innerHTML = `<img src="https://win98icons.alexmeub.com/icons/png/folder_closed-0.png"><span>${repo.name}</span>`;
+    div.onclick = (e) => { e.stopPropagation(); explorerOpenRepo(repo); };
+    treeEl.appendChild(div);
+  });
+}
+
+function explorerShowRepos() {
+  const filesEl = document.getElementById('explorer-files');
+  filesEl.innerHTML = '';
+  explorerCurrentRepo = null;
+  explorerRepos.forEach(repo => {
+    const div = document.createElement('div');
+    div.className = 'explorer-file';
+    div.innerHTML = `<img src="https://win98icons.alexmeub.com/icons/png/folder_closed-0.png" onerror="this.src='https://win98icons.alexmeub.com/icons/png/folder_closed-0.png'"><span>${repo.name}</span>`;
+    div.ondblclick = () => explorerOpenRepo(repo);
+    div.onclick = (e) => {
+      e.stopPropagation();
+      filesEl.querySelectorAll('.explorer-file').forEach(f => f.classList.remove('selected'));
+      div.classList.add('selected');
+      const desc = repo.description ? repo.description : 'No description';
+      document.getElementById('explorer-status-size').textContent = (repo.language || 'Unknown') + ' · ' + desc.substring(0, 40);
+    };
+    filesEl.appendChild(div);
+  });
+  document.getElementById('explorer-status-items').textContent = explorerRepos.length + ' repositories';
+  document.getElementById('explorer-status-size').textContent = '';
+}
+
+async function explorerOpenRepo(repo, path) {
+  explorerCurrentRepo = repo;
+  explorerCurrentPath = path || '';
+  const filesEl = document.getElementById('explorer-files');
+  const addr    = path ? `GitHub / ${GITHUB_USER} / ${repo.name} / ${path}` : `GitHub / ${GITHUB_USER} / ${repo.name}`;
+  document.getElementById('explorer-addr').value = addr;
+  document.getElementById('explorer-title').textContent = (path ? path.split('/').pop() : repo.name) + ' - ' + GITHUB_USER;
+  filesEl.innerHTML = '<div style="padding:8px;font-size:11px;color:#555">Loading...</div>';
+  try {
+    const apiPath = path ? `/contents/${path}` : '/contents';
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${repo.name}${apiPath}`);
+    const items = await res.json();
+    if (!Array.isArray(items)) { filesEl.innerHTML = '<div style="padding:8px;font-size:11px;color:#555">Empty or inaccessible.</div>'; return; }
+    filesEl.innerHTML = '';
+    const sorted = [...items].sort((a,b) => { if(a.type===b.type) return a.name.localeCompare(b.name); return a.type==='dir'?-1:1; });
+    sorted.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'explorer-file';
+      const icon = item.type === 'dir'
+        ? 'https://win98icons.alexmeub.com/icons/png/folder_closed-0.png'
+        : explorerFileIcon(item.name);
+      div.innerHTML = `<img src="${icon}" onerror="this.src='https://win98icons.alexmeub.com/icons/png/file-0.png'"><span>${item.name}</span>`;
+      div.ondblclick = () => {
+        if (item.type === 'dir') explorerOpenRepo(repo, item.path);
+        else window.open(item.html_url, '_blank');
+      };
+      div.onclick = (e) => {
+        e.stopPropagation();
+        filesEl.querySelectorAll('.explorer-file').forEach(f => f.classList.remove('selected'));
+        div.classList.add('selected');
+        document.getElementById('explorer-status-size').textContent = item.type === 'dir' ? 'Folder' : (item.size ? Math.ceil(item.size/1024) + ' KB' : '');
+      };
+      filesEl.appendChild(div);
+    });
+    document.getElementById('explorer-status-items').textContent = sorted.length + ' object(s)';
+    document.getElementById('explorer-status-size').textContent = '';
+  } catch(e) {
+    filesEl.innerHTML = '<div style="padding:8px;font-size:11px;color:red">Error loading contents.</div>';
+  }
+}
+
+function explorerBack()    { explorerLoadRepos(); }
+function explorerForward() {}
+function explorerUp() {
+  if (!explorerCurrentRepo) return;
+  if (!explorerCurrentPath) { explorerCurrentRepo = null; explorerShowRepos(); document.getElementById('explorer-addr').value = 'GitHub / ' + GITHUB_USER; document.getElementById('explorer-title').textContent = GITHUB_USER + ' - GitHub'; return; }
+  const parts = explorerCurrentPath.split('/');
+  parts.pop();
+  explorerOpenRepo(explorerCurrentRepo, parts.join('/') || '');
+}
+
+/* ── Minesweeper ── */
+// Pixel SVG icons
+const SVG_MINE = `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <rect x="6" y="6" width="4" height="4" fill="#000"/>
+  <rect x="5" y="5" width="6" height="6" fill="#000"/>
+  <rect x="4" y="6" width="8" height="4" fill="#000"/>
+  <rect x="6" y="4" width="4" height="8" fill="#000"/>
+  <rect x="2" y="7" width="2" height="2" fill="#000"/>
+  <rect x="12" y="7" width="2" height="2" fill="#000"/>
+  <rect x="7" y="2" width="2" height="2" fill="#000"/>
+  <rect x="7" y="12" width="2" height="2" fill="#000"/>
+  <rect x="3" y="3" width="2" height="2" fill="#000"/>
+  <rect x="11" y="3" width="2" height="2" fill="#000"/>
+  <rect x="3" y="11" width="2" height="2" fill="#000"/>
+  <rect x="11" y="11" width="2" height="2" fill="#000"/>
+  <rect x="6" y="6" width="2" height="2" fill="#fff" opacity="0.4"/>
+</svg>`;
+
+const SVG_FLAG = `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <rect x="7" y="2" width="2" height="12" fill="#000"/>
+  <rect x="9" y="3" width="4" height="1" fill="#f00"/>
+  <rect x="9" y="4" width="5" height="1" fill="#f00"/>
+  <rect x="9" y="5" width="5" height="1" fill="#f00"/>
+  <rect x="9" y="6" width="4" height="1" fill="#f00"/>
+  <rect x="5" y="13" width="6" height="1" fill="#000"/>
+  <rect x="4" y="14" width="8" height="1" fill="#000"/>
+</svg>`;
+
+const SVG_MINE_HIT = `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <rect x="6" y="6" width="4" height="4" fill="#000"/>
+  <rect x="5" y="5" width="6" height="6" fill="#000"/>
+  <rect x="4" y="6" width="8" height="4" fill="#000"/>
+  <rect x="6" y="4" width="4" height="8" fill="#000"/>
+  <rect x="2" y="7" width="2" height="2" fill="#000"/>
+  <rect x="12" y="7" width="2" height="2" fill="#000"/>
+  <rect x="7" y="2" width="2" height="2" fill="#000"/>
+  <rect x="7" y="12" width="2" height="2" fill="#000"/>
+  <rect x="3" y="3" width="2" height="2" fill="#000"/>
+  <rect x="11" y="3" width="2" height="2" fill="#000"/>
+  <rect x="3" y="11" width="2" height="2" fill="#000"/>
+  <rect x="11" y="11" width="2" height="2" fill="#000"/>
+  <rect x="1" y="1" width="3" height="1" fill="#ff0"/>
+  <rect x="12" y="1" width="3" height="1" fill="#ff0"/>
+  <rect x="1" y="14" width="3" height="1" fill="#ff0"/>
+  <rect x="12" y="14" width="3" height="1" fill="#ff0"/>
+  <rect x="6" y="6" width="2" height="2" fill="#fff" opacity="0.4"/>
+</svg>`;
+
+// Face SVGs
+const FACE_SMILE = `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <rect x="4" y="1" width="8" height="1" fill="#ff0"/>
+  <rect x="2" y="2" width="2" height="1" fill="#ff0"/><rect x="12" y="2" width="2" height="1" fill="#ff0"/>
+  <rect x="1" y="3" width="1" height="10" fill="#ff0"/><rect x="14" y="3" width="1" height="10" fill="#ff0"/>
+  <rect x="2" y="13" width="2" height="1" fill="#ff0"/><rect x="12" y="13" width="2" height="1" fill="#ff0"/>
+  <rect x="4" y="14" width="8" height="1" fill="#ff0"/>
+  <rect x="4" y="1" width="8" height="13" fill="#ff0"/>
+  <rect x="2" y="2" width="12" height="12" fill="#ff0"/>
+  <rect x="5" y="5" width="2" height="2" fill="#000"/>
+  <rect x="9" y="5" width="2" height="2" fill="#000"/>
+  <rect x="4" y="10" width="1" height="1" fill="#000"/>
+  <rect x="5" y="11" width="1" height="1" fill="#000"/>
+  <rect x="6" y="12" width="4" height="1" fill="#000"/>
+  <rect x="10" y="11" width="1" height="1" fill="#000"/>
+  <rect x="11" y="10" width="1" height="1" fill="#000"/>
+  <rect x="1" y="3" width="14" height="10" fill="none"/>
+  <rect x="2" y="2" width="12" height="12" fill="none"/>
+</svg>`;
+
+const FACE_DEAD = `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <rect x="4" y="1" width="8" height="13" fill="#ff0"/>
+  <rect x="2" y="2" width="12" height="12" fill="#ff0"/>
+  <rect x="1" y="3" width="14" height="10" fill="#ff0"/>
+  <rect x="5" y="5" width="1" height="1" fill="#000"/><rect x="7" y="5" width="1" height="1" fill="#000"/>
+  <rect x="6" y="6" width="1" height="1" fill="#000"/><rect x="5" y="7" width="1" height="1" fill="#000"/>
+  <rect x="7" y="7" width="1" height="1" fill="#000"/>
+  <rect x="9" y="5" width="1" height="1" fill="#000"/><rect x="11" y="5" width="1" height="1" fill="#000"/>
+  <rect x="10" y="6" width="1" height="1" fill="#000"/><rect x="9" y="7" width="1" height="1" fill="#000"/>
+  <rect x="11" y="7" width="1" height="1" fill="#000"/>
+  <rect x="5" y="11" width="6" height="1" fill="#000"/>
+  <rect x="4" y="12" width="8" height="1" fill="#000"/>
+  <rect x="5" y="10" width="1" height="1" fill="#000"/>
+  <rect x="10" y="10" width="1" height="1" fill="#000"/>
+</svg>`;
+
+const FACE_COOL = `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <rect x="4" y="1" width="8" height="13" fill="#ff0"/>
+  <rect x="2" y="2" width="12" height="12" fill="#ff0"/>
+  <rect x="1" y="3" width="14" height="10" fill="#ff0"/>
+  <rect x="4" y="5" width="4" height="3" fill="#000"/>
+  <rect x="8" y="5" width="4" height="3" fill="#000"/>
+  <rect x="5" y="6" width="2" height="1" fill="#fff"/>
+  <rect x="9" y="6" width="2" height="1" fill="#fff"/>
+  <rect x="3" y="4" width="10" height="1" fill="#000"/>
+  <rect x="5" y="11" width="1" height="1" fill="#000"/>
+  <rect x="6" y="12" width="4" height="1" fill="#000"/>
+  <rect x="10" y="11" width="1" height="1" fill="#000"/>
+</svg>`;
+
+let mineRows = 9, mineCols = 9, mineCount = 10;
+let mineBoard = [], mineRevealed = [], mineFlagged = [];
+let mineGameOver = false, mineWon = false, mineStarted = false;
+let mineTimerInt = null, mineTimerVal = 0;
+let mineCurrentDiff = 'easy';
+
+function mineSetDiff(d) {
+  mineCurrentDiff = d;
+  document.querySelectorAll('.mine-difficulty button').forEach(b => b.classList.remove('active'));
+  document.getElementById('mine-btn-' + d).classList.add('active');
+  if (d === 'easy')  { mineRows = 9;  mineCols = 9;  mineCount = 10; }
+  if (d === 'med')   { mineRows = 16; mineCols = 16; mineCount = 40; }
+  if (d === 'hard')  { mineRows = 16; mineCols = 30; mineCount = 99; }
+  mineInit();
+}
+
+function mineFmt(n) { return String(Math.min(999, Math.max(0, n))).padStart(3, '0'); }
+
+function mineSetFace(type) {
+  const btn = document.getElementById('mine-face');
+  btn.innerHTML = type === 'dead' ? FACE_DEAD : type === 'cool' ? FACE_COOL : FACE_SMILE;
+}
+
+function mineInit() {
+  clearInterval(mineTimerInt);
+  mineGameOver = false; mineWon = false; mineStarted = false;
+  mineTimerVal = 0;
+  document.getElementById('mine-timer').textContent = '000';
+  mineSetFace('smile');
+  document.getElementById('mine-flag-count').textContent = mineFmt(mineCount);
+  mineBoard    = Array.from({length: mineRows}, () => Array(mineCols).fill(0));
+  mineRevealed = Array.from({length: mineRows}, () => Array(mineCols).fill(false));
+  mineFlagged  = Array.from({length: mineRows}, () => Array(mineCols).fill(false));
+  mineRender();
+}
+
+function minePlaceMines(safeR, safeC) {
+  let placed = 0;
+  while (placed < mineCount) {
+    const r = Math.floor(Math.random() * mineRows);
+    const c = Math.floor(Math.random() * mineCols);
+    if (mineBoard[r][c] === -1) continue;
+    if (Math.abs(r - safeR) <= 1 && Math.abs(c - safeC) <= 1) continue;
+    mineBoard[r][c] = -1; placed++;
+  }
+  for (let r = 0; r < mineRows; r++)
+    for (let c = 0; c < mineCols; c++)
+      if (mineBoard[r][c] !== -1) {
+        let count = 0;
+        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+          const nr = r+dr, nc = c+dc;
+          if (nr >= 0 && nr < mineRows && nc >= 0 && nc < mineCols && mineBoard[nr][nc] === -1) count++;
+        }
+        mineBoard[r][c] = count;
+      }
+}
+
+function mineReveal(r, c) {
+  if (r < 0 || r >= mineRows || c < 0 || c >= mineCols) return;
+  if (mineRevealed[r][c] || mineFlagged[r][c]) return;
+  mineRevealed[r][c] = true;
+  if (mineBoard[r][c] === 0)
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) mineReveal(r+dr, c+dc);
+}
+
+function mineClick(r, c) {
+  if (mineGameOver || mineWon || mineFlagged[r][c] || mineRevealed[r][c]) return;
+  if (!mineStarted) {
+    mineStarted = true;
+    minePlaceMines(r, c);
+    mineTimerInt = setInterval(() => {
+      mineTimerVal++;
+      document.getElementById('mine-timer').textContent = mineFmt(mineTimerVal);
+      if (mineTimerVal >= 999) clearInterval(mineTimerInt);
+    }, 1000);
+  }
+  if (mineBoard[r][c] === -1) {
+    mineGameOver = true;
+    clearInterval(mineTimerInt);
+    mineSetFace('dead');
+    mineRevealed[r][c] = true;
+    mineRender(r, c);
+    return;
+  }
+  mineReveal(r, c);
+  mineCheckWin();
+  mineRender();
+}
+
+function mineRightClick(e, r, c) {
+  e.preventDefault();
+  if (mineGameOver || mineWon || mineRevealed[r][c]) return;
+  mineFlagged[r][c] = !mineFlagged[r][c];
+  const flagsUsed = mineFlagged.flat().filter(Boolean).length;
+  document.getElementById('mine-flag-count').textContent = mineFmt(mineCount - flagsUsed);
+  mineRender();
+}
+
+function mineCheckWin() {
+  let unrevealed = 0;
+  for (let r = 0; r < mineRows; r++)
+    for (let c = 0; c < mineCols; c++)
+      if (!mineRevealed[r][c]) unrevealed++;
+  if (unrevealed === mineCount) {
+    mineWon = true;
+    clearInterval(mineTimerInt);
+    mineSetFace('cool');
+  }
+}
+
+function mineRender(explodeR, explodeC) {
+  const grid = document.getElementById('mine-grid');
+  grid.innerHTML = '';
+  for (let r = 0; r < mineRows; r++) {
+    const row = document.createElement('div');
+    row.className = 'mine-row';
+    for (let c = 0; c < mineCols; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'mine-cell';
+      const isExplode = mineGameOver && r === explodeR && c === explodeC && mineBoard[r][c] === -1;
+      if (isExplode) {
+        cell.classList.add('exploded'); cell.innerHTML = SVG_MINE_HIT;
+      } else if (mineGameOver && mineBoard[r][c] === -1 && !mineFlagged[r][c]) {
+        cell.classList.add('revealed'); cell.innerHTML = SVG_MINE;
+      } else if (mineRevealed[r][c]) {
+        cell.classList.add('revealed');
+        if (mineBoard[r][c] > 0) { cell.textContent = mineBoard[r][c]; cell.setAttribute('data-n', mineBoard[r][c]); }
+      } else if (mineFlagged[r][c]) {
+        cell.classList.add('flagged'); cell.innerHTML = SVG_FLAG;
+      }
+      cell.onclick = () => mineClick(r, c);
+      cell.oncontextmenu = (e) => mineRightClick(e, r, c);
+      row.appendChild(cell);
+    }
+    grid.appendChild(row);
+  }
+  const win = document.getElementById('win-mine');
+  if (win) win.style.width = 'auto';
+}
 </script>
 </body>
 </html>

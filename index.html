@@ -534,11 +534,11 @@
           <span>Media Player</span>
         </div>
         <div class="start-menu-item" onclick="openWindow('win-explorer');explorerLoadRepos();document.getElementById('start-menu').classList.remove('active')">
-          <img src="https://win98icons.alexmeub.com/icons/png/my_computer-0.png" style="width:20px;height:20px;" onerror="this.style.display='none'">
+          <img src="https://win98icons.alexmeub.com/icons/png/my_computer-0.png" style="width:20px;height:20px;" onerror="this.src='https://win98icons.alexmeub.com/icons/png/computer_explorer-0.png';this.onerror=null;">
           <span>My Computer</span>
         </div>
         <div class="start-menu-item" onclick="openWindow('win-mine');mineInit();document.getElementById('start-menu').classList.remove('active')">
-          <img src="https://win98icons.alexmeub.com/icons/png/minesweeper_mine-0.png" style="width:20px;height:20px;" onerror="this.style.display='none'">
+          <img src="https://win98icons.alexmeub.com/icons/png/minesweeper_mine-0.png" style="width:20px;height:20px;" onerror="this.src='https://win98icons.alexmeub.com/icons/png/minesweeper-0.png';this.onerror=null;">
           <span>Minesweeper</span>
         </div>
       </div>
@@ -584,8 +584,8 @@
   <button class="taskbar-task" id="btn-win-paint"   onclick="taskbarToggle('win-paint')">Paint</button>
   <button class="taskbar-task" id="btn-win-notepad" onclick="taskbarToggle('win-notepad')">Notepad</button>
   <button class="taskbar-task" id="btn-win-player"  onclick="taskbarToggle('win-player')">Media Player</button>
-  <button class="taskbar-task" id="btn-win-explorer" onclick="taskbarToggle('win-explorer')">My Computer</button>
-  <button class="taskbar-task" id="btn-win-mine" onclick="taskbarToggle('win-mine')">Minesweeper</button>
+  <button class="taskbar-task" id="btn-win-explorer" onclick="taskbarToggle('win-explorer')"><img src="https://win98icons.alexmeub.com/icons/png/my_computer-0.png" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;" onerror="this.style.display='none'">My Computer</button>
+  <button class="taskbar-task" id="btn-win-mine" onclick="taskbarToggle('win-mine')"><img src="https://win98icons.alexmeub.com/icons/png/minesweeper_mine-0.png" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;" onerror="this.style.display='none'">Minesweeper</button>
   <div class="taskbar-clock" id="taskbar-clock">--:--</div>
 </div>
 
@@ -660,6 +660,7 @@ const quotes = [
   { text: "Have you tried turning it off and on again?", author: "IT Crowd" },
   { text: "add niko as quote", author: "niko" },
   { text: "the pee pee man he pee pees your man", author: "niko" },
+  { text: "also \"robert i want a quote plz\" please", author: "robert" },
 ];
 let quoteIdx = 0;
 function nextQuote() {
@@ -921,15 +922,21 @@ function explorerGetLangIcon(lang) {
 }
 
 function explorerFileIcon(name) {
-  if (name.endsWith('.py'))   return 'https://win98icons.alexmeub.com/icons/png/file_settings-0.png';
-  if (name.endsWith('.js'))   return 'https://win98icons.alexmeub.com/icons/png/html-1.png';
-  if (name.endsWith('.html')) return 'https://win98icons.alexmeub.com/icons/png/html-1.png';
-  if (name.endsWith('.css'))  return 'https://win98icons.alexmeub.com/icons/png/html-1.png';
-  if (name.endsWith('.md'))   return 'https://win98icons.alexmeub.com/icons/png/notepad-0.png';
-  if (name.endsWith('.txt'))  return 'https://win98icons.alexmeub.com/icons/png/notepad-0.png';
-  if (name.endsWith('.json')) return 'https://win98icons.alexmeub.com/icons/png/file_settings-0.png';
-  if (name.endsWith('.jpg') || name.endsWith('.png') || name.endsWith('.gif')) return 'https://win98icons.alexmeub.com/icons/png/paint_old-0.png';
-  return 'https://win98icons.alexmeub.com/icons/png/file-0.png';
+  const B = 'https://win98icons.alexmeub.com/icons/png/';
+  const n = name.toLowerCase();
+  const ext = n.includes('.') ? n.slice(n.lastIndexOf('.')) : n;
+  if (['.txt','.md','.log','.nfo'].includes(ext)) return B + 'notepad-0.png';
+  if (n === 'readme' || n === 'license' || n === 'licence') return B + 'notepad-0.png';
+  if (['.html','.htm','.js','.ts','.jsx','.tsx','.css'].includes(ext)) return B + 'html-1.png';
+  if (['.py','.rb','.php','.sh','.bat','.c','.cpp','.h','.java','.rs','.go','.cs'].includes(ext)) return B + 'file_settings-0.png';
+  if (n === 'makefile' || n === 'dockerfile' || n === '.gitignore' || n === '.editorconfig') return B + 'file_settings-0.png';
+  if (['.json','.xml','.yaml','.yml','.toml','.ini','.env','.csv','.lock'].includes(ext)) return B + 'file_settings-0.png';
+  if (['.jpg','.jpeg','.png','.gif','.bmp','.ico','.svg','.webp'].includes(ext)) return B + 'paint_old-0.png';
+  if (['.mp3','.wav','.ogg','.flac','.aac','.m4a','.wma','.mp4','.avi','.mkv','.mov'].includes(ext)) return B + 'cd_audio_cd_a-4.png';
+  if (['.zip','.rar','.tar','.gz','.7z','.bz2'].includes(ext)) return B + 'directory_open_file_mydocs-4.png';
+  if (['.exe','.msi','.dll'].includes(ext)) return B + 'application_hourglass_small-4.png';
+  if (['.pdf','.doc','.docx','.xls','.xlsx','.ppt','.pptx'].includes(ext)) return B + 'directory_open_file_mydocs-4.png';
+  return B + 'file-0.png';
 }
 
 async function explorerLoadRepos() {
@@ -974,7 +981,7 @@ function explorerShowRepos() {
   explorerRepos.forEach(repo => {
     const div = document.createElement('div');
     div.className = 'explorer-file';
-    div.innerHTML = `<img src="https://win98icons.alexmeub.com/icons/png/folder_closed-0.png" onerror="this.src='https://win98icons.alexmeub.com/icons/png/folder_closed-0.png'"><span>${repo.name}</span>`;
+    div.innerHTML = `<img src="https://win98icons.alexmeub.com/icons/png/folder_closed-0.png" onerror="this.src='https://win98icons.alexmeub.com/icons/png/directory_closed-0.png'"><span>${repo.name}</span>`;
     div.ondblclick = () => explorerOpenRepo(repo);
     div.onclick = (e) => {
       e.stopPropagation();
@@ -1010,7 +1017,8 @@ async function explorerOpenRepo(repo, path) {
       const icon = item.type === 'dir'
         ? 'https://win98icons.alexmeub.com/icons/png/folder_closed-0.png'
         : explorerFileIcon(item.name);
-      div.innerHTML = `<img src="${icon}" onerror="this.src='https://win98icons.alexmeub.com/icons/png/file-0.png'"><span>${item.name}</span>`;
+      const errFallback = item.type === 'dir' ? 'https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs-4.png' : 'https://win98icons.alexmeub.com/icons/png/notepad-0.png';
+      div.innerHTML = `<img src="${icon}" onerror="this.src='${errFallback}'"><span>${item.name}</span>`;
       div.ondblclick = () => {
         if (item.type === 'dir') explorerOpenRepo(repo, item.path);
         else window.open(item.html_url, '_blank');

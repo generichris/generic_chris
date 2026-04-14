@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generic_chris</title>
+  <link rel="stylesheet" href="https://unpkg.com/98.css">
+  <link rel="icon" type="image/png" href="https://win98icons.alexmeub.com/icons/png/windows_slanted-1.png">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0; background-color: #008080;
+      height: 100vh; overflow: hidden;
+      font-family: 'Pixelated MS Sans Serif', Arial, sans-serif; font-size: 11px;
+      cursor: url('Cursor79.cur'), auto;
+    }
+    button:hover { cursor: url('Cursor107.cur'), auto; }
+    .not-allowed { cursor: url('Cursor99.cur'), auto; }
+
+    #boot-splash {
+      position: fixed; inset: 0; background: #000; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease;
+    }
+    #boot-splash.fade-out { opacity: 0; pointer-events: none; }
+    #boot-splash.hidden { display: none; }
+    #boot-gif { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; }
+
+    #bsod {
+      display: none; position: fixed; inset: 0; background: #000080; z-index: 8000;
+      color: white; font-family: 'Courier New', monospace; font-size: 13px;
+      padding: 40px 60px; line-height: 1.8; cursor: default;
+    }
+    #bsod.active { display: block; }
+    .bsod-header { background: #aaaaaa; color: #000080; padding: 2px 8px; display: inline-block; margin-bottom: 24px; font-size: 13px; }
+    .bsod-body { max-width: 680px; }
+    .bsod-body p { margin: 0 0 16px; }
+    .bsod-code { font-size: 12px; color: #c0c0ff; margin-bottom: 24px; }
+    .bsod-restart { color: #ffff00; font-size: 12px; animation: bsod-blink 1s step-start infinite; }
+    @keyframes bsod-blink { 50% { opacity: 0; } }
+    .bsod-footer { position: absolute; bottom: 40px; left: 60px; font-size: 11px; color: #c0c0c0; }
+
+    .desktop { position: relative; width: 100vw; height: calc(100vh - 30px); overflow: hidden; }
+
+    .draggable-window { position: absolute; z-index: 10; }
+    .title-bar { cursor: move; }
+    .draggable-window > .window { resize: both; overflow: auto; min-width: 200px; min-height: 100px; box-shadow: 2px 2px 3px rgba(0,0,0,0.3); }
+    .draggable-window.minimized { display: none !important; }
+
+    #win-main    { top: 30px;  left: 30px;  width: 720px; max-width: 90vw; }
+    #win-profile { top: 30px;  left: 780px; width: 220px; max-width: 90vw; }
+    #win-links   { top: 220px; left: 780px; width: 220px; max-width: 90vw; }
+    #win-quote   { top: 380px; left: 780px; width: 220px; max-width: 90vw; }
+    #win-paint   { top: 60px;  left: 100px; width: 540px; max-width: 95vw; display: none; }
+    #win-notepad { top: 80px;  left: 160px; width: 460px; max-width: 95vw; display: none; }
+    #win-player  { top: 120px; left: 220px; width: 300px; max-width: 95vw; display: none; }
+
+    .taskbar {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 30px;
+      background: #c0c0c0; border-top: 2px solid #ffffff;
+      display: flex; align-items: center; padding: 0 4px; gap: 4px; z-index: 100;
+    }
+    .start-button { font-weight: bold; display: flex; align-items: center; gap: 5px; height: 22px; padding: 0 6px !important; font-size: 11px; }
+    .start-logo { width: 18px; height: 18px; image-rendering: pixelated; object-fit: contain; }
+    .taskbar-sep { width: 1px; height: 22px; background: #808080; border-right: 1px solid white; margin: 0 2px; }
+    .taskbar-task { height: 22px; font-size: 10px; padding: 0 8px !important; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: none; }
+    .taskbar-task.active-task { display: block; font-weight: bold; }
+    .taskbar-clock { margin-left: auto; border: inset 2px; height: 22px; padding: 0 8px; display: flex; align-items: center; font-size: 11px; min-width: 50px; background: #c0c0c0; }
+
+    .start-menu {
+      position: fixed; bottom: 30px; left: 2px; width: 240px;
+      background: #c0c0c0; border: 2px solid;
+      border-top-color: #dfdfdf; border-left-color: #dfdfdf;
+      border-right-color: #000000; border-bottom-color: #000000;
+      display: none; z-index: 1000; box-shadow: 2px 2px 3px rgba(0,0,0,0.5); flex-direction: row;
+    }
+    .start-menu.active { display: flex; }
+    .start-menu-banner { width: 30px; background: linear-gradient(to bottom, #000080, #1084d0); color: white; writing-mode: vertical-rl; transform: rotate(180deg); text-align: right; padding: 8px 5px; font-size: 16px; font-weight: bold; }
+    .start-menu-items { flex-grow: 1; padding: 2px; display: flex; flex-direction: column; }
+    .start-menu-item { display: flex; align-items: center; gap: 10px; padding: 6px 10px; cursor: pointer; color: black; text-decoration: none; position: relative; }
+    .start-menu-item:hover { background: #000080; color: white; }
+    .start-menu-item img { width: 32px; height: 32px; image-rendering: pixelated; }
+    .start-submenu { display: none; position: absolute; left: 100%; top: 0; background: #c0c0c0; border: 2px solid; border-top-color: #dfdfdf; border-left-color: #dfdfdf; border-right-color: #000000; border-bottom-color: #000000; width: 180px; box-shadow: 2px 2px 3px rgba(0,0,0,0.5); }
+    .start-menu-item:hover > .start-submenu { display: block; }
+    .start-divider { border-top: 1px solid #808080; border-bottom: 1px solid #ffffff; margin: 4px 2px; }
+
+    .nav-bar { display: flex; border-bottom: 2px solid #808080; }
+    .nav-bar button { border: none !important; box-shadow: none !important; background: transparent !important; font-size: 11px; padding: 2px 10px !important; cursor: pointer; height: auto; color: inherit; }
+    .nav-bar button:hover, .nav-bar button.active { background: #000080 !important; color: white !important; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .hero { background: #000080; color: white; padding: 16px; margin-bottom: 8px; }
+    .hero h1 { margin: 0 0 6px; font-size: 16px; font-weight: bold; color: white; }
+    .hero p { margin: 0; color: #c0c0ff; font-size: 11px; }
+    .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
+    .feature-card { padding: 6px 8px; }
+    .feature-card strong { display: block; margin-bottom: 2px; font-size: 11px; }
+    .feature-card p { margin: 0; font-size: 10px; color: #444; }
+    .data-table { width: 100%; font-size: 11px; border-collapse: collapse; }
+    .data-table thead tr { background: #000080; color: white; }
+    .data-table thead th { padding: 4px 8px; text-align: left; font-weight: bold; }
+    .data-table tbody tr:nth-child(even) { background: #f0f0f0; }
+    .data-table tbody tr:hover { background: #c8c8ff; cursor: pointer; }
+    .data-table tbody td { padding: 3px 8px; border-bottom: 1px solid #c0c0c0; }
+    .link-list { list-style: none; margin: 0; padding: 0; }
+    .link-list li { padding: 3px 0; border-bottom: 1px dotted #808080; font-size: 11px; }
+    .link-list li:last-child { border-bottom: none; }
+    .link-list a { color: #000080; text-decoration: none; }
+    .link-list a:hover { text-decoration: underline; }
+    .skill-row { margin-bottom: 6px; font-size: 11px; }
+    .skill-label { display: flex; justify-content: space-between; margin-bottom: 2px; }
+    .marquee-bar { background: #000080; color: white; padding: 2px 0; overflow: hidden; font-size: 11px; }
+    .marquee-bar marquee { margin: 0; }
+    .profile-avatar { width: 52px; height: 52px; background: #000080; border: outset 2px; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; }
+    .person-icon { position: relative; width: 28px; height: 32px; }
+    .person-head { width: 12px; height: 12px; background: #c0c0c0; border-radius: 50%; margin: 0 auto 3px; }
+    .person-body { width: 20px; height: 14px; background: #c0c0c0; border-radius: 4px 4px 0 0; margin: 0 auto; }
+
+    #paint-canvas-wrap { background: #ffffff; border: inset 2px; display: inline-block; line-height: 0; }
+    #paint-canvas { display: block; cursor: crosshair; }
+    .paint-toolbar { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-bottom: 2px solid #808080; flex-wrap: wrap; }
+    .paint-toolbar label { font-size: 10px; }
+    .color-palette { display: flex; flex-wrap: wrap; width: 96px; gap: 1px; border: inset 1px; padding: 2px; }
+    .color-swatch { width: 12px; height: 12px; border: outset 1px; cursor: pointer; flex-shrink: 0; }
+    .color-swatch:hover { border: inset 1px; }
+    .active-color-box { width: 24px; height: 24px; border: inset 2px; flex-shrink: 0; }
+    .paint-size-btn { border: outset 1px; background: #c0c0c0; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; }
+    .paint-size-btn.active { border: inset 1px; background: #a0a0a0; }
+    .paint-tool-btn { border: outset 1px; background: #c0c0c0; cursor: pointer; font-size: 10px; padding: 2px 6px; white-space: nowrap; }
+    .paint-tool-btn.active { border: inset 1px; background: #a0a0a0; }
+    .paint-status { font-size: 10px; padding: 2px 6px; border-top: 2px solid #808080; color: #444; }
+
+    /* Notepad */
+    #notepad-textarea { width: 100%; height: 300px; resize: none; font-family: 'Courier New', monospace; font-size: 12px; border: inset 2px; padding: 4px; outline: none; background: #fff; color: #000; display: block; }
+    .notepad-menu { display: flex; border-bottom: 1px solid #808080; }
+    .notepad-menu button { background: none; border: none; padding: 2px 10px; font-size: 11px; cursor: pointer; box-shadow: none !important; }
+    .notepad-menu button:hover { background: #000080; color: white; }
+    .notepad-status { font-size: 10px; padding: 2px 6px; border-top: 1px solid #808080; color: #444; }
+
+    /* MP3 Player */
+    .player-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+    .player-display { background: #003300; color: #00ff00; font-family: 'Courier New', monospace; font-size: 11px; padding: 6px 8px; border: inset 2px; height: 36px; display: flex; align-items: center; overflow: hidden; }
+    .player-controls { display: flex; gap: 4px; justify-content: center; }
+    .player-controls button { width: 36px; height: 28px; font-size: 12px; display: flex; align-items: center; justify-content: center; padding: 0 !important; }
+    .player-seek { width: 100%; accent-color: #000080; cursor: pointer; }
+    .player-vol-row { display: flex; align-items: center; gap: 6px; font-size: 10px; }
+    .player-vol-row input { flex: 1; accent-color: #000080; cursor: pointer; }
+    .player-time { font-size: 10px; color: #555; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div id="boot-splash">
+  <img id="boot-gif" src="start.gif" alt="Starting Windows 98">
+</div>
+<audio id="boot-audio" src="win98.mp3" preload="auto" oncanplay="this.volume=0.05"></audio>
+
+<div id="bsod">
+  <div class="bsod-body">
+    <div class="bsod-header">Windows</div>
+    <p>A fatal exception 0E has occurred at 0028:C0011E36 in VXD VMM(01) +<br>00010E36. The current application will be terminated.</p>
+    <p>*  Press any key to terminate the current application.<br>*  Press CTRL+ALT+DEL again to restart your computer. You will<br>&nbsp;&nbsp;&nbsp;lose any unsaved information in all applications.</p>
+    <div class="bsod-code">
+      EXCEPTION: PAGE_FAULT_IN_NONPAGED_AREA<br>
+      Address: 0x0000001E (0xC0000005, 0xBFF9A3B0, 0x00000000, 0x00000000)<br>
+      STOP: 0x0000001E KMODE_EXCEPTION_NOT_HANDLED
+    </div>
+    <div class="bsod-restart">Press any key to continue _</div>
+  </div>
+  <div class="bsod-footer">Windows 98 SE &nbsp;|&nbsp; Uptime: 00:<span id="bsod-uptime">00</span>:00</div>
+</div>
+
+<div class="desktop">
+
+  <div class="draggable-window" id="win-main">
+    <div class="window">
+      <div class="title-bar">
+        <div class="title-bar-text">My Windows 98 Website</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize" onclick="toggleMinimize('win-main')"></button>
+          <button aria-label="Maximize" onclick="toggleMaximize('win-main')"></button>
+          <button aria-label="Close" onclick="closeWindow('win-main')"></button>
+        </div>
+      </div>
+      <div class="nav-bar">
+        <button class="active" onclick="switchTab('home', this)">Home</button>
+        <button onclick="switchTab('about', this)">About</button>
+        <button onclick="switchTab('projects', this)">Projects</button>
+      </div>
+      <div class="marquee-bar">
+        <marquee behavior="scroll" direction="left" scrollamount="3">
+          Welcome to my Windows 98 website! &nbsp;&nbsp;&nbsp;&nbsp; Check out my latest projects &nbsp;&nbsp;&nbsp;&nbsp; Built with 98.css &nbsp;&nbsp;&nbsp;&nbsp;
+        </marquee>
+      </div>
+      <div class="window-body">
+        <div id="tab-home" class="tab-content active">
+          <div class="hero"><h1>Welcome to My Site</h1><p>my Windows 98 website.</p></div>
+          <p style="font-size:11px;margin:0 0 8px;"><strong>What I do:</strong></p>
+          <div class="card-grid">
+            <div class="window feature-card"><strong>Web Dev</strong><p>building things with HTML, CSS, and JavaScript.</p></div>
+            <div class="window feature-card"><strong>Machine learning</strong><p>Machine learning I dont know what else you want me to say</p></div>
+            <div class="window feature-card"><strong>Chess</strong><p>Amateur player.</p></div>
+          </div>
+        </div>
+        <div id="tab-about" class="tab-content">
+          <fieldset>
+            <legend>Skills</legend>
+            <div class="skill-row"><div class="skill-label"><label>Python</label><label>90%</label></div><div class="progress-indicator"><span class="progress-indicator-bar" style="width:90%"></span></div></div>
+            <div class="skill-row"><div class="skill-label"><label>Blender</label><label>20%</label></div><div class="progress-indicator"><span class="progress-indicator-bar" style="width:20%"></span></div></div>
+            <div class="skill-row"><div class="skill-label"><label>Chess</label><label>1%</label></div><div class="progress-indicator"><span class="progress-indicator-bar" style="width:1%"></span></div></div>
+          </fieldset>
+        </div>
+        <div id="tab-projects" class="tab-content">
+         <div class="sunken-panel" style="height:220px">
+          <table class="interactive data-table">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Language</th>
+                <th>Status</th>
+                <th>Year</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Portfolio Site</td>
+                <td>HTML/CSS</td>
+                <td>Completed</td>
+                <td>2026</td>
+              </tr>
+            </tbody>
+             </table>
+          </div>
+        </div>
+
+      </div>
+      <div class="status-bar">
+        <p class="status-bar-field" id="status-text">Ready</p>
+        <p class="status-bar-field">Secure</p>
+        <p class="status-bar-field" id="clock-status">--:--</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="draggable-window" id="win-profile">
+    <div class="window">
+      <div class="title-bar">
+        <div class="title-bar-text">Profile</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize" onclick="toggleMinimize('win-profile')"></button>
+          <button aria-label="Close" onclick="closeWindow('win-profile')"></button>
+        </div>
+      </div>
+      <div class="window-body" style="text-align:center;padding:10px">
+        <div class="profile-avatar"><div class="person-icon"><div class="person-head"></div><div class="person-body"></div></div></div>
+        <strong style="display:block;font-size:12px">Chris</strong>
+        <span style="font-size:10px;color:#555">Developer &amp; Hobbyist</span><br><br>
+        <button style="width:100%;font-size:10px" onclick="alert('coming soon')">View Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="draggable-window" id="win-links">
+    <div class="window">
+      <div class="title-bar">
+        <div class="title-bar-text">Quick Links</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize" onclick="toggleMinimize('win-links')"></button>
+          <button aria-label="Close" onclick="closeWindow('win-links')"></button>
+        </div>
+      </div>
+      <div class="window-body">
+        <ul class="link-list">
+          <li><a href="https://www.chess.com/member/generic_chris">Chess.com Profile</a></li>
+          <li><a href="https://github.com/generichris">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="draggable-window" id="win-quote">
+    <div class="window">
+      <div class="title-bar">
+        <div class="title-bar-text">Random Quote</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize" onclick="toggleMinimize('win-quote')"></button>
+          <button aria-label="Close" onclick="closeWindow('win-quote')"></button>
+        </div>
+      </div>
+      <div class="window-body" style="font-size:10px">
+        <p id="quote-text" style="margin:0 0 4px;font-style:italic;min-height:36px">"The computer was born to solve problems that did not exist before."</p>
+        <p id="quote-author" style="margin:0 0 6px;color:#555">-- Bill Gates</p>
+        <button style="width:100%;font-size:10px" onclick="nextQuote()">Next Quote</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="draggable-window" id="win-paint">
+    <div class="window" style="width:540px;">
+      <div class="title-bar">
+        <div class="title-bar-text">Paint</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize" onclick="toggleMinimize('win-paint')"></button>
+          <button aria-label="Maximize" onclick="toggleMaximize('win-paint')"></button>
+          <button aria-label="Close" onclick="closeWindow('win-paint')"></button>
+        </div>
+      </div>
+      <div class="window-body" style="padding:0;">
+        <div class="paint-toolbar">
+          <label>Tool:</label>
+          <button class="paint-tool-btn active" id="tool-pencil" onclick="setTool('pencil')">Pencil</button>
+          <button class="paint-tool-btn" id="tool-fill" onclick="setTool('fill')">Fill</button>
+          <button class="paint-tool-btn" id="tool-eraser" onclick="setTool('eraser')">Eraser</button>
+          <button class="paint-tool-btn" id="tool-line" onclick="setTool('line')">Line</button>
+          <button class="paint-tool-btn" id="tool-rect" onclick="setTool('rect')">Rect</button>
+          <div style="width:1px;height:24px;background:#808080;margin:0 2px;"></div>
+          <label>Size:</label>
+          <button class="paint-size-btn active" id="sz-1" onclick="setBrush(1,'sz-1')" title="1px"><div style="width:2px;height:2px;background:#000;border-radius:50%;"></div></button>
+          <button class="paint-size-btn" id="sz-3" onclick="setBrush(3,'sz-3')" title="3px"><div style="width:6px;height:6px;background:#000;border-radius:50%;"></div></button>
+          <button class="paint-size-btn" id="sz-6" onclick="setBrush(6,'sz-6')" title="6px"><div style="width:12px;height:12px;background:#000;border-radius:50%;"></div></button>
+          <button class="paint-size-btn" id="sz-12" onclick="setBrush(12,'sz-12')" title="12px"><div style="width:18px;height:18px;background:#000;border-radius:50%;"></div></button>
+          <div style="width:1px;height:24px;background:#808080;margin:0 2px;"></div>
+          <div class="active-color-box" id="active-color-box" style="background:#000000;" title="Current color"></div>
+          <div class="color-palette" id="palette"></div>
+          <div style="width:1px;height:24px;background:#808080;margin:0 2px;"></div>
+          <button class="paint-tool-btn" onclick="clearCanvas()">Clear</button>
+          <button class="paint-tool-btn" onclick="saveCanvas()">Save</button>
+        </div>
+        <div style="padding:4px;background:#808080;overflow:auto;">
+          <div id="paint-canvas-wrap">
+            <canvas id="paint-canvas" width="500" height="340"></canvas>
+          </div>
+        </div>
+        <div class="paint-status" id="paint-status">Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTEPAD -->
+  <div class="draggable-window" id="win-notepad">
+    <div class="window">
+      <div class="title-bar">
+        <div class="title-bar-text" id="notepad-title">Untitled - Notepad</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize" onclick="toggleMinimize('win-notepad')"></button>
+          <button aria-label="Maximize" onclick="toggleMaximize('win-notepad')"></button>
+          <button aria-label="Close" onclick="closeWindow('win-notepad')"></button>
+        </div>
+      </div>
+      <div class="notepad-menu">
+        <button onclick="notepadNew()">New</button>
+        <button onclick="notepadSave()">Save</button>
+        <button onclick="notepadWordWrap(this)">Word Wrap: Off</button>
+      </div>
+      <div class="window-body" style="padding:0;">
+        <textarea id="notepad-textarea" spellcheck="false" placeholder="Type here..."></textarea>
+      </div>
+      <div class="notepad-status" id="notepad-status">Ln 1, Col 1</div>
+    </div>
+  </div>
+
+  <!-- MP3 PLAYER -->
+  <div class="draggable-window" id="win-player">
+    <div class="window">
+      <div class="title-bar">
+        <div class="title-bar-text">Windows Media Player</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize" onclick="toggleMinimize('win-player')"></button>
+          <button aria-label="Close" onclick="closeWindow('win-player')"></button>
+        </div>
+      </div>
+      <div class="window-body" style="padding:0;">
+        <div class="player-body">
+          <div class="player-display"><span id="player-label">&#9654;&nbsp;FDJ (Freie Deutsche Jugend)</span></div>
+          <div class="player-time" id="player-time">0:00 / 0:00</div>
+          <input type="range" class="player-seek" id="player-seek" value="0" min="0" step="0.1" max="100">
+          <div class="player-controls">
+            <button title="Rewind" onclick="playerRewind()">&#9664;&#9664;</button>
+            <button title="Play" id="btn-play" onclick="playerPlay()">&#9654;</button>
+            <button title="Pause" id="btn-pause" onclick="playerPause()" style="display:none">&#10074;&#10074;</button>
+            <button title="Stop" onclick="playerStop()">&#9632;</button>
+            <button title="Forward" onclick="playerForward()">&#9654;&#9654;</button>
+          </div>
+          <div class="player-vol-row">
+            <span>Vol:</span>
+            <input type="range" min="0" max="1" step="0.01" value="0.1" id="player-vol" oninput="playerSetVol(this.value)">
+            <span id="player-vol-pct">10%</span>
+          </div>
+        </div>
+        <audio id="mp3-audio" src="FDJ (Freie Deutsche Jugend).mp3" preload="auto"></audio>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /desktop -->
+
+<div id="start-menu" class="start-menu">
+  <div class="start-menu-banner">Windows 98</div>
+  <div class="start-menu-items">
+    <div class="start-menu-item">
+      <img src="https://win98icons.alexmeub.com/icons/png/appwizard-4.png" alt="Programs">
+      <span><u>P</u>rograms</span>
+      <div class="start-submenu">
+        <div class="start-menu-item" onclick="openWindow('win-main')">
+          <img src="https://win98icons.alexmeub.com/icons/png/html-1.png" style="width:20px;height:20px;">
+          <span>My Website</span>
+        </div>
+        <div class="start-menu-item" onclick="openWindow('win-profile')">
+          <img src="https://win98icons.alexmeub.com/icons/png/user_world-0.png" style="width:20px;height:20px;">
+          <span>Profile</span>
+        </div>
+        <div class="start-menu-item" onclick="openWindow('win-links')">
+          <img src="https://win98icons.alexmeub.com/icons/png/world-0.png" style="width:20px;height:20px;">
+          <span>Quick Links</span>
+        </div>
+        <div class="start-menu-item" onclick="openWindow('win-quote')">
+          <img src="https://win98icons.alexmeub.com/icons/png/accessibility_two_windows.png" style="width:20px;height:20px;">
+          <span>Quotes</span>
+        </div>
+        <div class="start-menu-item" onclick="openWindow('win-paint');document.getElementById('start-menu').classList.remove('active')">
+          <img src="https://win98icons.alexmeub.com/icons/png/paint_old-0.png" style="width:20px;height:20px;" onerror="this.style.display='none'">
+          <span>Paint</span>
+        </div>
+        <div class="start-menu-item" onclick="openWindow('win-notepad');document.getElementById('start-menu').classList.remove('active')">
+          <img src="https://win98icons.alexmeub.com/icons/png/notepad-0.png" style="width:20px;height:20px;" onerror="this.style.display='none'">
+          <span>Notepad</span>
+        </div>
+        <div class="start-menu-item" onclick="openWindow('win-player');document.getElementById('start-menu').classList.remove('active')">
+          <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png" style="width:20px;height:20px;" onerror="this.style.display='none'">
+          <span>Media Player</span>
+        </div>
+      </div>
+    </div>
+    <div class="start-menu-item" onclick="alert('coming soon')">
+      <img src="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs-4.png" alt="Documents">
+      <span><u>D</u>ocuments</span>
+    </div>
+    <div class="start-menu-item" onclick="alert('coming soon')">
+      <img src="https://win98icons.alexmeub.com/icons/png/settings_gear-0.png" alt="Settings">
+      <span><u>S</u>ettings</span>
+    </div>
+    <div class="start-menu-item" onclick="alert('coming soon')">
+      <img src="https://win98icons.alexmeub.com/icons/png/search_file-2.png" alt="Find">
+      <span><u>F</u>ind</span>
+    </div>
+    <div class="start-menu-item" onclick="alert('coming soon')">
+      <img src="https://win98icons.alexmeub.com/icons/png/help_book_big-0.png" alt="Help">
+      <span><u>H</u>elp</span>
+    </div>
+    <div class="start-menu-item" onclick="alert('coming soon')">
+      <img src="https://win98icons.alexmeub.com/icons/png/application_hourglass_small-4.png" alt="Run">
+      <span><u>R</u>un...</span>
+    </div>
+    <div class="start-divider"></div>
+    <div class="start-menu-item" onclick="triggerBSOD()">
+      <img src="https://win98icons.alexmeub.com/icons/png/shut_down_normal-0.png" alt="Shut Down">
+      <span>Sh<u>u</u>t Down...</span>
+    </div>
+  </div>
+</div>
+
+<div class="taskbar">
+  <button class="start-button" onclick="toggleStartMenu()">
+    <img src="https://win98icons.alexmeub.com/icons/png/windows_slanted-1.png" class="start-logo" alt="Start">
+    Start
+  </button>
+  <div class="taskbar-sep"></div>
+  <button class="taskbar-task active-task" id="btn-win-main"    onclick="taskbarToggle('win-main')">My Website</button>
+  <button class="taskbar-task active-task" id="btn-win-profile" onclick="taskbarToggle('win-profile')">Profile</button>
+  <button class="taskbar-task active-task" id="btn-win-links"   onclick="taskbarToggle('win-links')">Links</button>
+  <button class="taskbar-task active-task" id="btn-win-quote"   onclick="taskbarToggle('win-quote')">Quote</button>
+  <button class="taskbar-task" id="btn-win-paint"   onclick="taskbarToggle('win-paint')">Paint</button>
+  <button class="taskbar-task" id="btn-win-notepad" onclick="taskbarToggle('win-notepad')">Notepad</button>
+  <button class="taskbar-task" id="btn-win-player"  onclick="taskbarToggle('win-player')">Media Player</button>
+  <div class="taskbar-clock" id="taskbar-clock">--:--</div>
+</div>
+
+<script>
+/* ── Boot ── */
+function runBootSequence() {
+  const audio = document.getElementById('boot-audio');
+  audio.play().catch(() => {});
+  setTimeout(() => {
+    const splash = document.getElementById('boot-splash');
+    splash.classList.add('fade-out');
+    setTimeout(() => splash.classList.add('hidden'), 500);
+  }, 4200);
+}
+window.addEventListener('load', runBootSequence);
+
+/* ── BSOD ── */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _actx = null;
+function getACtx() { if (!_actx) _actx = new AudioCtx(); return _actx; }
+function playErrorSound() {
+  try {
+    const ctx = getACtx();
+    [220, 180].forEach((freq, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sawtooth'; o.frequency.value = freq;
+      const t = ctx.currentTime + i * 0.125;
+      g.gain.setValueAtTime(0.1, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      o.start(t); o.stop(t + 0.26);
+    });
+  } catch(e) {}
+}
+let bsodActive = false;
+function triggerBSOD() {
+  playErrorSound();
+  document.getElementById('start-menu').classList.remove('active');
+  document.getElementById('bsod').classList.add('active');
+  bsodActive = true;
+  let secs = 0;
+  const el = document.getElementById('bsod-uptime');
+  setInterval(() => { secs++; el.textContent = String(secs).padStart(2,'0'); }, 1000);
+}
+document.addEventListener('keydown', () => {
+  if (!bsodActive) return;
+  const bsod = document.getElementById('bsod');
+  bsod.style.opacity = '0'; bsod.style.transition = 'opacity 0.4s';
+  setTimeout(() => { bsod.classList.remove('active'); bsod.style.opacity = ''; bsodActive = false; }, 400);
+});
+
+/* ── Clock ── */
+function updateClock() {
+  const now = new Date();
+  const t = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('taskbar-clock').textContent = t;
+  const cs = document.getElementById('clock-status');
+  if (cs) cs.textContent = t;
+}
+updateClock(); setInterval(updateClock, 10000);
+
+/* ── Quotes ── */
+const quotes = [
+  { text: "The computer was born to solve problems that did not exist before.", author: "Bill Gates" },
+  { text: "Any fool can write code that a computer can understand.", author: "Martin Fowler" },
+  { text: "Chess is life in miniature.", author: "Garry Kasparov" },
+  { text: "Arch Linux: rolling release, rolling your eyes.", author: "Anonymous" },
+  { text: "Have you tried turning it off and on again?", author: "IT Crowd" },
+  { text: "add niko as quote", author: "niko" },
+  { text: "the pee pee man he pee pees your man", author: "niko" },
+];
+let quoteIdx = 0;
+function nextQuote() {
+  quoteIdx = (quoteIdx + 1) % quotes.length;
+  document.getElementById('quote-text').textContent = '"' + quotes[quoteIdx].text + '"';
+  document.getElementById('quote-author').textContent = '-- ' + quotes[quoteIdx].author;
+}
+
+/* ── Window management ── */
+function openWindow(id) {
+  const win = document.getElementById(id);
+  const btn = document.getElementById('btn-' + id);
+  win.style.display = 'block';
+  win.classList.remove('minimized');
+  if (btn) btn.classList.add('active-task');
+  bringToFront(win);
+}
+function closeWindow(id) {
+  document.getElementById(id).style.display = 'none';
+  const btn = document.getElementById('btn-' + id);
+  if (btn) btn.classList.remove('active-task');
+}
+function toggleMinimize(id) { document.getElementById(id).classList.add('minimized'); }
+function taskbarToggle(id) {
+  const win = document.getElementById(id);
+  if (win.classList.contains('minimized')) { win.classList.remove('minimized'); bringToFront(win); }
+  else win.classList.add('minimized');
+}
+function toggleMaximize(id) {
+  const w = document.getElementById(id);
+  if (w.style.width === '100vw') {
+    w.style.width  = w.dataset.oldWidth  || '720px';
+    w.style.height = w.dataset.oldHeight || 'auto';
+    w.style.top    = w.dataset.oldTop    || '30px';
+    w.style.left   = w.dataset.oldLeft   || '30px';
+  } else {
+    w.dataset.oldWidth  = w.style.width  || w.offsetWidth  + 'px';
+    w.dataset.oldHeight = w.style.height || w.offsetHeight + 'px';
+    w.dataset.oldTop    = w.style.top    || w.offsetTop    + 'px';
+    w.dataset.oldLeft   = w.style.left   || w.offsetLeft   + 'px';
+    w.style.top = '0'; w.style.left = '0';
+    w.style.width = '100vw'; w.style.height = 'calc(100vh - 30px)';
+    w.querySelector('.window').style.height = '100%';
+  }
+}
+let topZ = 100;
+function bringToFront(win) { topZ++; win.style.zIndex = topZ; }
+
+/* ── Start menu ── */
+function toggleStartMenu() { document.getElementById('start-menu').classList.toggle('active'); }
+document.addEventListener('click', e => {
+  const menu = document.getElementById('start-menu');
+  const btn  = document.querySelector('.start-button');
+  if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('active');
+});
+
+/* ── Tabs ── */
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-bar button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('status-text').textContent = 'Viewing: ' + name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+/* ── Drag ── */
+function makeDraggable(elmnt) {
+  let p1=0,p2=0,p3=0,p4=0;
+  const tb = elmnt.querySelector('.title-bar');
+  if (!tb) return;
+  tb.onmousedown = function(e) {
+    if (e.target.tagName === 'BUTTON') return;
+    e.preventDefault(); p3 = e.clientX; p4 = e.clientY;
+    document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
+    document.onmousemove = function(e) {
+      e.preventDefault();
+      p1 = p3 - e.clientX; p2 = p4 - e.clientY; p3 = e.clientX; p4 = e.clientY;
+      elmnt.style.top  = (elmnt.offsetTop  - p2) + 'px';
+      elmnt.style.left = (elmnt.offsetLeft - p1) + 'px';
+    };
+    bringToFront(elmnt);
+  };
+}
+document.querySelectorAll('.draggable-window').forEach(w => {
+  makeDraggable(w);
+  w.addEventListener('mousedown', () => bringToFront(w));
+});
+
+/* ── Notepad ── */
+const notepadTA = document.getElementById('notepad-textarea');
+notepadTA.addEventListener('keyup', updateNotepadStatus);
+notepadTA.addEventListener('click', updateNotepadStatus);
+function updateNotepadStatus() {
+  const before = notepadTA.value.substr(0, notepadTA.selectionStart).split('\n');
+  document.getElementById('notepad-status').textContent = `Ln ${before.length}, Col ${before[before.length-1].length + 1}`;
+}
+function notepadNew() {
+  if (notepadTA.value && !confirm('Discard changes?')) return;
+  notepadTA.value = '';
+  document.getElementById('notepad-title').textContent = 'Untitled - Notepad';
+  document.getElementById('notepad-status').textContent = 'Ln 1, Col 1';
+}
+function notepadSave() {
+  const blob = new Blob([notepadTA.value], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'document.txt'; a.click();
+}
+let notepadWrap = false;
+function notepadWordWrap(btn) {
+  notepadWrap = !notepadWrap;
+  notepadTA.style.whiteSpace = notepadWrap ? 'pre-wrap' : 'pre';
+  notepadTA.style.overflowX  = notepadWrap ? 'hidden' : 'auto';
+  btn.textContent = 'Word Wrap: ' + (notepadWrap ? 'On' : 'Off');
+}
+
+/* ── MP3 Player ── */
+const mp3 = document.getElementById('mp3-audio');
+mp3.volume = 0.7;
+
+function fmtTime(s) {
+  if (!s || isNaN(s)) return '0:00';
+  return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
+}
+function playerPlay() {
+  mp3.play();
+  document.getElementById('btn-play').style.display  = 'none';
+  document.getElementById('btn-pause').style.display = 'inline-flex';
+  document.getElementById('player-label').textContent = '\u25B6 FDJ (Freie Deutsche Jugend).mp3';
+}
+function playerPause() {
+  mp3.pause();
+  document.getElementById('btn-play').style.display  = 'inline-flex';
+  document.getElementById('btn-pause').style.display = 'none';
+  document.getElementById('player-label').textContent = '\u23F8 FDJ (Freie Deutsche Jugend).mp3';
+}
+function playerStop() {
+  mp3.pause(); mp3.currentTime = 0;
+  document.getElementById('btn-play').style.display  = 'inline-flex';
+  document.getElementById('btn-pause').style.display = 'none';
+  document.getElementById('player-label').textContent = '\u25B6 FDJ (Freie Deutsche Jugend).mp3';
+  document.getElementById('player-seek').value = 0;
+  document.getElementById('player-time').textContent = '0:00 / 0:00';
+}
+function playerRewind()  { mp3.currentTime = Math.max(0, mp3.currentTime - 10); }
+function playerForward() { mp3.currentTime = Math.min(mp3.duration||0, mp3.currentTime + 10); }
+function playerSetVol(v) {
+  mp3.volume = v;
+  document.getElementById('player-vol-pct').textContent = Math.round(v*100) + '%';
+}
+mp3.addEventListener('timeupdate', () => {
+  const seek = document.getElementById('player-seek');
+  if (mp3.duration) { seek.max = mp3.duration; seek.value = mp3.currentTime; }
+  document.getElementById('player-time').textContent = fmtTime(mp3.currentTime) + ' / ' + fmtTime(mp3.duration);
+});
+mp3.addEventListener('ended', () => {
+  document.getElementById('btn-play').style.display  = 'inline-flex';
+  document.getElementById('btn-pause').style.display = 'none';
+  document.getElementById('player-label').textContent = '\u25B6 FDJ (Freie Deutsche Jugend).mp3';
+});
+document.getElementById('player-seek').addEventListener('input', function() { mp3.currentTime = this.value; });
+
+/* ── Paint ── */
+const canvas = document.getElementById('paint-canvas');
+const ctx2 = canvas.getContext('2d');
+ctx2.fillStyle = '#ffffff'; ctx2.fillRect(0,0,canvas.width,canvas.height);
+let painting=false, currentTool='pencil', brushSize=1, currentColor='#000000', startX, startY, snapshot;
+const PALETTE_COLORS = [
+  '#000000','#808080','#800000','#808000','#008000','#008080','#000080','#800080',
+  '#ffffff','#c0c0c0','#ff0000','#ffff00','#00ff00','#00ffff','#0000ff','#ff00ff',
+  '#ff8040','#804000','#004040','#0080ff','#8080ff','#ff0080','#804080','#408080'
+];
+const palette = document.getElementById('palette');
+PALETTE_COLORS.forEach(color => {
+  const sw = document.createElement('div');
+  sw.className = 'color-swatch'; sw.style.background = color;
+  sw.onclick = () => { currentColor = color; document.getElementById('active-color-box').style.background = color; };
+  palette.appendChild(sw);
+});
+function setTool(t) {
+  currentTool = t;
+  document.querySelectorAll('.paint-tool-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tool-' + t).classList.add('active');
+}
+function setBrush(size, id) {
+  brushSize = size;
+  document.querySelectorAll('.paint-size-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function clearCanvas() { ctx2.fillStyle='#ffffff'; ctx2.fillRect(0,0,canvas.width,canvas.height); }
+function saveCanvas() { const a=document.createElement('a'); a.download='painting.png'; a.href=canvas.toDataURL(); a.click(); }
+function floodFill(x, y, fillColor) {
+  const id2=ctx2.getImageData(0,0,canvas.width,canvas.height), d=id2.data;
+  const i=(y*canvas.width+x)*4;
+  const tR=d[i],tG=d[i+1],tB=d[i+2],tA=d[i+3];
+  const fc=parseInt(fillColor.slice(1),16), fR=(fc>>16)&255, fG=(fc>>8)&255, fB=fc&255;
+  if(tR===fR&&tG===fG&&tB===fB) return;
+  const stack=[[x,y]];
+  while(stack.length){
+    const[cx,cy]=stack.pop(), ci=(cy*canvas.width+cx)*4;
+    if(d[ci]!==tR||d[ci+1]!==tG||d[ci+2]!==tB||d[ci+3]!==tA) continue;
+    d[ci]=fR;d[ci+1]=fG;d[ci+2]=fB;d[ci+3]=255;
+    if(cx>0)stack.push([cx-1,cy]); if(cx<canvas.width-1)stack.push([cx+1,cy]);
+    if(cy>0)stack.push([cx,cy-1]); if(cy<canvas.height-1)stack.push([cx,cy+1]);
+  }
+  ctx2.putImageData(id2,0,0);
+}
+canvas.addEventListener('mousedown', e => {
+  painting=true; const r=canvas.getBoundingClientRect();
+  startX=e.clientX-r.left; startY=e.clientY-r.top;
+  if(currentTool==='fill'){floodFill(Math.floor(startX),Math.floor(startY),currentColor);painting=false;return;}
+  snapshot=ctx2.getImageData(0,0,canvas.width,canvas.height);
+  ctx2.beginPath(); ctx2.arc(startX,startY,brushSize/2,0,Math.PI*2);
+  ctx2.fillStyle=currentTool==='eraser'?'#ffffff':currentColor; ctx2.fill();
+});
+canvas.addEventListener('mousemove', e => {
+  const r=canvas.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
+  document.getElementById('paint-status').textContent=`X: ${Math.floor(x)}, Y: ${Math.floor(y)}`;
+  if(!painting) return;
+  if(currentTool==='pencil'||currentTool==='eraser'){
+    ctx2.beginPath(); ctx2.arc(x,y,brushSize/2,0,Math.PI*2);
+    ctx2.fillStyle=currentTool==='eraser'?'#ffffff':currentColor; ctx2.fill();
+  } else if(currentTool==='line'){
+    ctx2.putImageData(snapshot,0,0); ctx2.beginPath(); ctx2.moveTo(startX,startY); ctx2.lineTo(x,y);
+    ctx2.strokeStyle=currentColor; ctx2.lineWidth=brushSize; ctx2.stroke();
+  } else if(currentTool==='rect'){
+    ctx2.putImageData(snapshot,0,0); ctx2.strokeStyle=currentColor; ctx2.lineWidth=brushSize;
+    ctx2.strokeRect(startX,startY,x-startX,y-startY);
+  }
+});
+canvas.addEventListener('mouseup', ()=>{painting=false;});
+canvas.addEventListener('mouseleave', ()=>{painting=false;});
+</script>
+</body>
+</html>
